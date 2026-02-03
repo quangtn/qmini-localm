@@ -43,13 +43,15 @@ Whether you're running models via Ollama, LM Studio, vLLM, or any other local in
 | Feature | Description |
 |---------|-------------|
 | 🔍 **Real-time Search** | Filter models instantly by name or tag |
-| 🏷️ **Category Filters** | Quick filter chips for Coding, Security, Reasoning, Fast, General, Long-Context, Vision |
+| 🏷️ **Category Filters** | Quick filter chips for All, OpenClaw, Coding, Security, Reasoning, Fast, General, Long-Context, Vision |
+| ⚡ **OpenClaw Preset** | One-click filter for recommended models (glm-4.7-flash, qwen3-coder-30b, qwq-32b, llama-4-scout) |
 | ↕️ **Multi-Sort Options** | Sort by Size (GB), Parameters, or Name (ascending/descending) |
 | 📋 **One-Click Copy** | Copy model names to clipboard with visual feedback |
 | 📊 **Size Visualization** | Color-coded progress bars indicate model size relative to RAM |
-| 🧠 **RAM Indicator** | System RAM display with compatibility warnings |
+| 🧠 **RAM Indicator** | System RAM display with compatibility warnings and VRAM explanation tooltip |
+| 🎯 **Flagship Comparisons** | Hover tooltips showing equivalent closed-source models (GPT-4, Claude, etc.) |
 | ⭐ **Default Highlight** | Visual badge for recommended default model |
-| 🌙 **Dark Theme** | Eye-friendly dark UI with Tailwind CSS |
+| ☀️/🌙 **Theme Toggle** | Light mode (default) and dark mode support |
 | 📱 **Responsive Design** | Works on desktop, tablet, and mobile |
 
 ---
@@ -60,8 +62,14 @@ Whether you're running models via Ollama, LM Studio, vLLM, or any other local in
 Click any filter chip to narrow down models by use case:
 
 ```
-[All] [Coding] [Security] [Reasoning] [Fast] [General] [Long-Context] [Vision]
+[All] [OpenClaw] [Coding] [Security] [Reasoning] [Fast] [General] [Long-Context] [Vision]
 ```
+
+**OpenClaw Preset:** A curated filter showing the recommended models for different tasks:
+- **glm-4.7-flash** — General daily tasks (default)
+- **qwen3-coder-30b** — Coding and code generation
+- **qwq-32b** — Complex reasoning and analysis
+- **llama-4-scout** — Vision and long-context documents
 
 ### Search
 Type in the search bar to filter by model name or tags:
@@ -149,17 +157,20 @@ Navigate to `http://localhost:5173` (or the port shown in your terminal).
 3. **Search** — Type in the search bar to find specific models
 4. **Sort** — Use the dropdown to organize by size, parameters, or name
 5. **Copy Model Name** — Click the copy icon on any card to copy the model identifier
-6. **Check RAM** — Review the RAM indicator to ensure model compatibility
+6. **Check RAM & VRAM** — Review the RAM indicator to ensure model compatibility
 
 ### Example Use Cases
 
-| Task | Recommended Filter | Top Models |
-|------|-------------------|------------|
-| Daily coding | Coding | `qwen/qwen3-coder-30b`, `deepseek-coder-v2-lite-16b` |
-| Security audit | Security | `nousresearch/hermes-4-70b` |
-| Quick lookups | Fast | `mistralai/ministral-3-3b`, `zai-org/glm-4.7-flash` |
-| Document analysis | Vision | `llama-4-scout-17b-16e-instruct` |
-| Complex reasoning | Reasoning | `qwen/qwq-32b`, `gpt-oss-120b` |
+| Task | Recommended Filter | Top Models | Flagship Equivalent |
+|------|-------------------|------------|---------------------|
+| Daily coding | Coding | `qwen/qwen3-coder-30b` | Claude 3.5 Sonnet |
+| Security audit | Security | `nousresearch/hermes-4-70b` | Claude 3 Opus |
+| Quick lookups | Fast | `mistralai/ministral-3-3b` | GPT-3.5 Turbo |
+| Document analysis | Vision | `llama-4-scout-17b-16e-instruct` | GPT-4o |
+| Complex reasoning | Reasoning | `qwen/qwq-32b`, `gpt-oss-120b` | OpenAI o1-mini, GPT-4 Turbo |
+| General tasks | General | `zai-org/glm-4.7-flash` | GPT-4o |
+
+> 💡 **Tip:** Hover over the "≈ Flagship" badge on any model card to see its equivalent closed-source model comparison.
 
 ### Keyboard Shortcuts
 
@@ -174,16 +185,18 @@ Navigate to `http://localhost:5173` (or the port shown in your terminal).
 
 ### Modifying System RAM
 
-Update the `SYSTEM_RAM` constant in the main component:
+Update the `SYSTEM_RAM` constant in `src/App.jsx`:
 
 ```javascript
 // Change this value to match your system's available RAM (in GB)
 const SYSTEM_RAM = 70;
 ```
 
+> **Note:** System RAM includes both your computer's RAM and GPU VRAM combined. However, for best performance with large models, sufficient dedicated VRAM is recommended.
+
 ### Adding New Models
 
-Add entries to the `models` array:
+Add entries to the `models` array in `src/App.jsx`:
 
 ```javascript
 {
@@ -192,19 +205,21 @@ Add entries to the `models` array:
   parameters: "7B",
   paramSort: 7,           // Numeric value for sorting
   size: 4.37,             // Size in GB
-  tags: ["general", "fast", "lightweight"],
+  tags: ["general", "fast", "lightweight", "openclaw"],
   recommendedFor: "Quick general tasks",
   isDefault: false,       // Set true for recommended default
+  equivalentTo: "GPT-4 (general)",  // Flagship model comparison
 }
 ```
 
 ### Customizing Categories
 
-Modify the `categories` array to add or remove filter options:
+Modify the `categories` array in `src/App.jsx` to add or remove filter options:
 
 ```javascript
 const categories = [
   { id: "all", label: "All", icon: Sparkles },
+  { id: "openclaw", label: "OpenClaw", icon: Zap },
   { id: "coding", label: "Coding", icon: Code },
   { id: "your-category", label: "Your Label", icon: YourIcon },
   // ...
@@ -213,12 +228,17 @@ const categories = [
 
 ### Customizing Tag Colors
 
-Add or modify entries in the `tagColors` object:
+Add or modify entries in the `tagColors` and `tagColorsLight` objects in `src/App.jsx`:
 
 ```javascript
 const tagColors = {
   "your-tag": "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
-  // ...
+  // ... (dark mode styles)
+};
+
+const tagColorsLight = {
+  "your-tag": "bg-indigo-100 text-indigo-900 border-indigo-300",
+  // ... (light mode styles)
 };
 ```
 
@@ -228,21 +248,8 @@ const tagColors = {
 
 ```
 local-llm-model-picker/
-├── public/
-│   └── favicon.ico
 ├── src/
-│   ├── components/
-│   │   ├── ModelCard.jsx        # Individual model card component
-│   │   ├── FilterChip.jsx       # Category filter button
-│   │   ├── RamIndicator.jsx     # System RAM display
-│   │   └── SearchBar.jsx        # Search input component
-│   ├── data/
-│   │   └── models.js            # Model definitions and metadata
-│   ├── constants/
-│   │   ├── categories.js        # Filter categories
-│   │   ├── sortOptions.js       # Sort dropdown options
-│   │   └── tagColors.js         # Tag color mappings
-│   ├── App.jsx                  # Main application component
+│   ├── App.jsx                  # Main application with all components
 │   ├── index.css                # Tailwind CSS imports
 │   └── main.jsx                 # React entry point
 ├── .gitignore
@@ -251,6 +258,7 @@ local-llm-model-picker/
 ├── postcss.config.js
 ├── tailwind.config.js
 ├── vite.config.js
+├── vercel.json                  # Vercel deployment config
 └── README.md
 ```
 
@@ -289,11 +297,13 @@ npm install -D vite tailwindcss postcss autoprefixer @vitejs/plugin-react
 
 ### Theming
 
-The dashboard uses Tailwind CSS with a slate-based dark theme. To customize:
+The dashboard supports both **light mode** (default) and **dark mode**. Toggle between themes using the sun/moon icon in the header.
 
-1. **Primary Color** — Replace `blue-500` references with your preferred color
-2. **Background** — Modify `bg-slate-900` and `bg-slate-800` classes
-3. **Accents** — Update tag colors in the `tagColors` object
+To customize:
+
+1. **Colors** — Modify the conditional classes based on `isDarkMode` state
+2. **Primary Color** — Replace `blue-500` references with your preferred color
+3. **Accents** — Update tag colors in the `tagColors` and `tagColorsLight` objects
 
 ### Adding Features
 
@@ -301,11 +311,11 @@ Potential enhancements you can implement:
 
 - [ ] Model comparison mode (side-by-side)
 - [ ] Favorites/bookmarks with localStorage persistence
-- [ ] VRAM vs RAM toggle for GPU inference
 - [ ] Export selected model config as JSON
 - [ ] Integration with Ollama/LM Studio APIs
 - [ ] Model download progress tracking
 - [ ] Performance benchmarks display
+- [ ] Custom theme color picker
 
 ---
 
